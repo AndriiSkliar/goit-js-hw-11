@@ -1,8 +1,9 @@
-import axios from "axios";
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import { throttle } from 'throttle-debounce';
-import * as Notify from './js/notify'
+import * as Notify from './js/notify';
+import { resp } from './js/api';
+import { createMarkup } from './js/markup';
 
 const searchFormInput = document.querySelector("#search-form");
 const gallery = document.querySelector(".gallery");
@@ -34,32 +35,19 @@ async function createRequest() {
     perPageCounter += perPage;
   }
 
-  const imageData = await sendRequest(value);
+  const imageData = await sendRequest();
   gallery.insertAdjacentHTML("beforeend", createMarkup(imageData.hits));
   simpleLightbox.refresh();
   page += 1;
-
-  if (imageData.hits.length < imageData.totalHits) {
-    let loading = false;
-
-    window.addEventListener('scroll', throttle(500, () => {
-    if (!loading && checkIfEndOfPage()) {
-      loading = true;
-      showLoadMorePage(imageData);
-    }
-}, { noLeading: true }));
-  }
+  addEvtListener(imageData);
 }
 
-async function sendRequest(value) {
+async function sendRequest() {
   try {
-    const BASE_URL = `https://pixabay.com/api/`;
-    const API_KEY = "39534369-205412e6b12f43677745c2c2a";
-    axios.defaults.baseURL = BASE_URL;
-    const resp = await axios.get(`?key=${API_KEY}&q=${value}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${perPage}`)
-    const totalHits = resp.data.totalHits;
+    const response = await resp(value, page, perPage);
+    const totalHits = response.data.totalHits;
 
-    if (resp.status !== 200) {
+    if (response.status !== 200) {
         throw new Error()
     }
 
@@ -70,30 +58,24 @@ async function sendRequest(value) {
       Notify.success(totalHits);
     }
 
-    return resp.data;
+    return response.data;
   } catch (error) {
     Notify.error();
   }
 }
 
-function createMarkup(data) {
-  return data
-    .map(
-      ({ id, webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
-      `<a class="gallery__link" href="${largeImageURL}">
-            <div class="gallery-item" id="${id}">
-              <img class="gallery-item__img" src="${webformatURL}" alt="${tags}" loading="lazy" />
-              <div class="info">
-                <p class="info-item"><b>Likes</b>${likes}</p>
-                <p class="info-item"><b>Views</b>${views}</p>
-                <p class="info-item"><b>Comments</b>${comments}</p>
-                <p class="info-item"><b>Downloads</b>${downloads}</p>
-              </div>
-            </div>
-          </a>`
-    )
-    .join("");
+function addEvtListener(imageData) {
+if (imageData.hits.length < imageData.totalHits) {
+    let loading = false;
+
+    window.addEventListener('scroll', throttle(500, () => {
+    if (!loading && checkIfEndOfPage()) {
+      loading = true;
+      showLoadMorePage(imageData);
+    }
+}, { noLeading: true }));
   }
+}
 
 function smoothScrolling() {
 const { height: cardHeight } = gallery.firstElementChild.getBoundingClientRect();
@@ -110,10 +92,10 @@ const onloadMore = (data) => {
     window.removeEventListener('scroll', showLoadMorePage);
     Notify.noMoreResults()
   } else {
-  createRequest();
-  smoothScrolling();}
+    createRequest();
+    smoothScrolling();
+  }
 };
-
 
 function checkIfEndOfPage() {
   return (
