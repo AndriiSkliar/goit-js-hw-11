@@ -37,12 +37,17 @@ async function createRequest() {
   const imageData = await sendRequest(value);
   gallery.insertAdjacentHTML("beforeend", createMarkup(imageData.hits));
   simpleLightbox.refresh();
+  page += 1;
 
   if (imageData.hits.length < imageData.totalHits) {
+    let loading = false;
+
     window.addEventListener('scroll', throttle(500, () => {
+    if (!loading && checkIfEndOfPage()) {
+      loading = true;
       showLoadMorePage(imageData);
-    }, { noLeading: true }
-    ));
+    }
+}, { noLeading: true }));
   }
 }
 
@@ -64,7 +69,6 @@ async function sendRequest(value) {
       });
       gallery.innerHTML = "";
     } else {
-        page += 1;
       Notify.success(`Hooray! We found ${totalHits} images.`, {
         timeout: 1900,
       });
@@ -122,7 +126,7 @@ const handleScroll = (data) => {
 
 function checkIfEndOfPage() {
   return (
-    (window.innerHeight * 2) + window.scrollY>= document.documentElement.scrollHeight
+    (window.innerHeight * 2) + window.scrollY >= document.documentElement.scrollHeight
   );
 }
 
