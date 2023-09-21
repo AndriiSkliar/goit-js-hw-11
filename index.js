@@ -111,8 +111,9 @@ const handleScroll = (data) => {
   if (page >= totalPages) {
     window.removeEventListener('scroll', showLoadMorePage);
     Notify.failure(
-      "We're sorry, but you've reached the end of search results."
-    );
+      "We're sorry, but you've reached the end of search results.", {
+        timeout: 1900,
+      });
   } else {
   createRequest();
   smoothScrolling();}
