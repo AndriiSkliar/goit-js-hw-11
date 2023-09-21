@@ -120,7 +120,7 @@ const handleScroll = (data) => {
 
 function checkIfEndOfPage() {
   return (
-    window.innerHeight + window.scrollY + (window.innerHeight * 2)>= document.documentElement.scrollHeight
+    (window.innerHeight * 2) + window.scrollY>= document.documentElement.scrollHeight
   );
 }
 
