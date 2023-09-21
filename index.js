@@ -109,7 +109,8 @@ const handleScroll = (data) => {
   const totalPages = Math.ceil(data.totalHits / perPage);
 
   if (page >= totalPages) {
-    Notiflix.Notify.failure(
+    window.removeEventListener('scroll', showLoadMorePage);
+    Notify.failure(
       "We're sorry, but you've reached the end of search results."
     );
   } else {
@@ -126,7 +127,6 @@ function checkIfEndOfPage() {
 
 function showLoadMorePage(data) {
   if (checkIfEndOfPage()) {
-    window.removeEventListener('scroll', showLoadMorePage);
     handleScroll(data);
   }
 }
