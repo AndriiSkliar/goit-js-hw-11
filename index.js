@@ -1,8 +1,8 @@
 import axios from "axios";
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import { throttle } from 'throttle-debounce';
+import * as Notify from './js/notify'
 
 const searchFormInput = document.querySelector("#search-form");
 const gallery = document.querySelector(".gallery");
@@ -64,21 +64,15 @@ async function sendRequest(value) {
     }
 
     if (!totalHits) {
-      Notify.failure("Sorry, there are no images matching your search query. Please try again.", {
-        timeout: 1900,
-      });
+      Notify.invalidRequest()
       gallery.innerHTML = "";
     } else {
-      Notify.success(`Hooray! We found ${totalHits} images.`, {
-        timeout: 1900,
-      });
+      Notify.success(totalHits);
     }
 
     return resp.data;
   } catch (error) {
-    Notify.failure('Something went wrong. Please try again later.', {
-        timeout: 1900,
-      });
+    Notify.error();
   }
 }
 
@@ -109,15 +103,12 @@ window.scrollBy({
 });
 }
 
-const handleScroll = (data) => {
+const onloadMore = (data) => {
   const totalPages = Math.ceil(data.totalHits / perPage);
 
   if (page >= totalPages) {
     window.removeEventListener('scroll', showLoadMorePage);
-    Notify.failure(
-      "We're sorry, but you've reached the end of search results.", {
-        timeout: 1900,
-      });
+    Notify.noMoreResults()
   } else {
   createRequest();
   smoothScrolling();}
@@ -132,7 +123,7 @@ function checkIfEndOfPage() {
 
 function showLoadMorePage(data) {
   if (checkIfEndOfPage()) {
-    handleScroll(data);
+    onloadMore(data);
   }
 }
 
