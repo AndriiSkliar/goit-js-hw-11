@@ -21,7 +21,11 @@ function getCurrentValue(e) {
   e.preventDefault();
 
   value = e.currentTarget.elements[0].value.trim();
-  createRequest()
+  if (value === '') {
+    Notify.emptyLine();
+  } else {
+    createRequest();
+  }
 }
 
 async function createRequest() {
@@ -71,7 +75,7 @@ if (imageData.hits.length < imageData.totalHits) {
     window.addEventListener('scroll', throttle(500, () => {
     if (!loading && checkIfEndOfPage()) {
       loading = true;
-      showLoadMorePage(imageData);
+      showLoadMorePage(imageData.totalHits);
     }
 }, { noLeading: true }));
   }
@@ -85,8 +89,8 @@ window.scrollBy({
 });
 }
 
-const onloadMore = (data) => {
-  const totalPages = Math.ceil(data.totalHits / perPage);
+const onloadMore = (totalHits) => {
+  const totalPages = Math.floor(totalHits / perPage);
 
   if (page >= totalPages) {
     window.removeEventListener('scroll', showLoadMorePage);
@@ -103,9 +107,9 @@ function checkIfEndOfPage() {
   );
 }
 
-function showLoadMorePage(data) {
+function showLoadMorePage(totalHits) {
   if (checkIfEndOfPage()) {
-    onloadMore(data);
+    onloadMore(totalHits);
   }
 }
 

@@ -26,4 +26,11 @@ function noMoreResults() {
       });
 }
 
-export { success, invalidRequest, error, noMoreResults };
+function emptyLine() {
+  Notify.failure(
+      'The search string cannot be empty. Please specify your search query.', {
+        timeout: 1900,
+      });
+}
+
+export { success, invalidRequest, error, noMoreResults, emptyLine };
