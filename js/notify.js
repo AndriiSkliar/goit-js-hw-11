@@ -1,36 +1,30 @@
 
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
+Notify.init({
+  timeout: 1900,
+});
+
 function success(data) {
-  Notify.success(`Hooray! We found ${data} images.`, {
-        timeout: 1900,
-      });
+  Notify.success(`Hooray! We found ${data} images.`);
 }
 
 function invalidRequest() {
-  Notify.failure("Sorry, there are no images matching your search query. Please try again.", {
-        timeout: 1900,
-      });
+  Notify.failure("Sorry, there are no images matching your search query. Please try again.");
 }
 
 function error() {
-  Notify.failure('Something went wrong. Please try again later.', {
-        timeout: 1900,
-      });
+  Notify.failure('Something went wrong. Please try again later.');
 }
 
 function noMoreResults() {
   Notify.failure(
-      "We're sorry, but you've reached the end of search results.", {
-        timeout: 1900,
-      });
+      "We're sorry, but you've reached the end of search results.");
 }
 
 function emptyLine() {
   Notify.failure(
-      'The search string cannot be empty. Please specify your search query.', {
-        timeout: 1900,
-      });
+      'The search string cannot be empty. Please specify your search query.');
 }
 
 export { success, invalidRequest, error, noMoreResults, emptyLine };
