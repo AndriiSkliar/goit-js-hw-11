@@ -22,6 +22,7 @@ let simpleLightbox = new SimpleLightbox('.gallery__link', {
 
 searchFormInput.addEventListener("submit", getCurrentValue);
 
+// Функция для обработки события submit
 function getCurrentValue(e) {
   e.preventDefault();
 
@@ -33,19 +34,17 @@ function getCurrentValue(e) {
   }
 }
 
+// Функция для создания запроса
 async function createRequest() {
   if (value !== currentValue) {
-    page = 1;
-    currentValue = value;
-    gallery.innerHTML = "";
-    perPageCounter = perPage;
+    resetGallery();
   } else {
     currentValue = value;
     perPageCounter += perPage;
   }
 
   if (page >= totalPages + 1) {
-    window.removeEventListener('scroll', showLoadMorePage);
+    removeScrollEventListener();
     Notify.noMoreResults();
     return
   }
@@ -58,6 +57,7 @@ async function createRequest() {
   addEvtListener(imageData);
 }
 
+// Функция для отправки запроса
 async function sendRequest() {
   try {
     const response = await resp(value, page, perPage);
@@ -82,19 +82,18 @@ async function sendRequest() {
   }
 }
 
+// Функция для добавления обработчика скролла
 function addEvtListener(imageData) {
   if (imageData.hits.length < imageData.totalHits) {
-
     if (!scrollEventListenerAdded) {
       scrollEventListenerAdded  = true;
-      window.addEventListener('scroll', throttle(500, () => {
-        showLoadMorePage();
-      }, { noLeading: true }))
+      window.addEventListener('scroll', throttle(500, showLoadMorePage, { noLeading: true }))
     } else {
     showLoadMorePage()}
   }
 }
 
+// Функция для плавной прокрутки
 function smoothScrolling() {
 const { height: cardHeight } = gallery.firstElementChild.getBoundingClientRect();
 window.scrollBy({
@@ -103,12 +102,14 @@ window.scrollBy({
 });
 }
 
+// Функция для проверки достижения конца страницы
 function checkIfEndOfPage() {
   return (
     (window.innerHeight * 2) + window.scrollY >= document.documentElement.scrollHeight
   );
 }
 
+// Функция для обработки скролла и создания запроса
 function showLoadMorePage() {
   if (checkIfEndOfPage()) {
     createRequest();
@@ -116,4 +117,16 @@ function showLoadMorePage() {
   }
 }
 
+// Функция для сброса галереи
+function resetGallery() {
+  page = 1;
+  currentValue = value;
+  gallery.innerHTML = '';
+  perPageCounter = perPage;
+}
 
+// Функция для удаления обработчика скролла
+function removeScrollEventListener() {
+  window.removeEventListener('scroll', showLoadMorePage);
+  scrollEventListenerAdded = false;
+}
