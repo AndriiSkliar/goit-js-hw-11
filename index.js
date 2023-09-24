@@ -12,8 +12,13 @@ const perPage = 40;
 let page = 1;
 let currentValue = "";
 let value = "";
-let simpleLightbox = new SimpleLightbox('.gallery__link');
 let perPageCounter = 0;
+let scrollEventListenerAdded = false;
+let totalPages = 10;
+let simpleLightbox = new SimpleLightbox('.gallery__link', {
+    captionsData: "alt",
+    captionDelay: 250,
+});
 
 searchFormInput.addEventListener("submit", getCurrentValue);
 
@@ -39,7 +44,14 @@ async function createRequest() {
     perPageCounter += perPage;
   }
 
+  if (page >= totalPages + 1) {
+    window.removeEventListener('scroll', showLoadMorePage);
+    Notify.noMoreResults();
+    return
+  }
+
   const imageData = await sendRequest();
+
   gallery.insertAdjacentHTML("beforeend", createMarkup(imageData.hits));
   simpleLightbox.refresh();
   page += 1;
@@ -50,9 +62,10 @@ async function sendRequest() {
   try {
     const response = await resp(value, page, perPage);
     const totalHits = response.data.totalHits;
+    totalPages = Math.ceil(totalHits / perPage);
 
     if (response.status !== 200) {
-        throw new Error()
+      throw new Error()
     }
 
     if (!totalHits) {
@@ -62,22 +75,23 @@ async function sendRequest() {
       Notify.success(totalHits);
     }
 
-    return response.data;
+  return response.data;
+
   } catch (error) {
     Notify.error();
   }
 }
 
 function addEvtListener(imageData) {
-if (imageData.hits.length < imageData.totalHits) {
-    let loading = false;
+  if (imageData.hits.length < imageData.totalHits) {
 
-    window.addEventListener('scroll', throttle(500, () => {
-    if (!loading && checkIfEndOfPage()) {
-      loading = true;
-      showLoadMorePage(imageData.totalHits);
-    }
-}, { noLeading: true }));
+    if (!scrollEventListenerAdded) {
+      scrollEventListenerAdded  = true;
+      window.addEventListener('scroll', throttle(500, () => {
+        showLoadMorePage();
+      }, { noLeading: true }))
+    } else {
+    showLoadMorePage()}
   }
 }
 
@@ -89,29 +103,17 @@ window.scrollBy({
 });
 }
 
-const onloadMore = (totalHits) => {
-  const totalPages = Math.floor(totalHits / perPage);
-
-  if (page >= totalPages) {
-    window.removeEventListener('scroll', showLoadMorePage);
-    Notify.noMoreResults()
-  } else {
-    createRequest();
-    smoothScrolling();
-  }
-};
-
 function checkIfEndOfPage() {
   return (
     (window.innerHeight * 2) + window.scrollY >= document.documentElement.scrollHeight
   );
 }
 
-function showLoadMorePage(totalHits) {
+function showLoadMorePage() {
   if (checkIfEndOfPage()) {
-    onloadMore(totalHits);
+    createRequest();
+    smoothScrolling();
   }
 }
-
 
 

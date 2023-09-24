@@ -2,7 +2,7 @@ function createMarkup(data) {
   return data
     .map(
       ({ id, webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
-      `<a class="gallery__link" href="${largeImageURL}">
+      `<a class="gallery__link" href="${largeImageURL}" alt="${tags}">
             <div class="gallery-item" id="${id}">
               <img class="gallery-item__img" src="${webformatURL}" alt="${tags}" loading="lazy" />
               <div class="info">
