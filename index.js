@@ -14,7 +14,7 @@ let currentValue = "";
 let value = "";
 let perPageCounter = 0;
 let scrollEventListenerAdded = false;
-let totalPages = 10;
+let totalPages = 1;
 let simpleLightbox = new SimpleLightbox('.gallery__link', {
     captionsData: "alt",
     captionDelay: 250,
